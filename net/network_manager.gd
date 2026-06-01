@@ -12,6 +12,7 @@ signal connected_to_server  ## solo para clientes: conexión establecida
 ## id → {name, avatar}
 var players: Dictionary = {}
 var my_info: Dictionary = {name = "Jugador", avatar = "male"}
+var house_path: String = ""  # ruta a modelo .glb/.gltf cargado por el host/solo
 
 
 func _ready() -> void:
@@ -20,6 +21,13 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+
+
+func start_solo() -> void:
+	multiplayer.multiplayer_peer = null
+	players.clear()
+	players[1] = my_info
+	player_connected.emit(1, my_info)
 
 
 func host() -> Error:
@@ -45,6 +53,8 @@ func join(ip: String) -> Error:
 func disconnect_game() -> void:
 	multiplayer.multiplayer_peer = null
 	players.clear()
+	LanDiscovery.stop_hosting()
+	LanDiscovery.stop_listening()
 
 
 # --- Señales de ENet ---

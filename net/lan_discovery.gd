@@ -88,7 +88,7 @@ func _send_broadcast() -> void:
 
 func _handle_packet(data: PackedByteArray, sender_ip: String) -> void:
 	var txt := data.get_string_from_utf8()
-	var parsed := JSON.parse_string(txt)
+	var parsed: Variant = JSON.parse_string(txt)
 	if not parsed is Dictionary:
 		return
 	parsed["ip"] = sender_ip  # IP real del paquete recibido

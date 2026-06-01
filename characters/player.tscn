@@ -41,7 +41,7 @@ rotation = Vector3(-0.3, 0, 0)
 
 [node name="NameLabel" type="Label3D" parent="."]
 position = Vector3(0, 2.3, 0)
-billboard = 3
+billboard = 1
 no_depth_test = true
 font_size = 48
 outline_size = 8
