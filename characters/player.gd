@@ -8,6 +8,10 @@ const ROT_LERP   := 12.0  # qué tan rápido el cuerpo se alinea con la cámara
 const CAM_SENS   := 0.003
 const CAM_MIN_X  := -0.6
 const CAM_MAX_X  :=  0.3
+const CAM_MIN_DIST := 0.3  # distancia mínima (primera persona)
+const CAM_MAX_DIST := 8.0  # distancia máxima
+const CAM_DEFAULT_DIST := 3.5
+const CAM_SCROLL_SPEED := 0.5
 
 const LOOPED_ANIMS := [
 	"Happy Idle", "Walking", "Walking Backwards",
@@ -29,6 +33,7 @@ var _climbing      : bool            = false
 var _near_climb    : bool            = false
 var _hud_ref       : Node            = null
 var _climb_normal  : Vector3         = Vector3.ZERO  # normal pared (apunta hacia el aire)
+var _cam_distance  : float           = CAM_DEFAULT_DIST
 
 
 func _ready() -> void:
@@ -46,6 +51,7 @@ func _ready() -> void:
 
 	_load_avatar()
 	$NameLabel.text = player_name
+	$SpringArm3D.spring_length = _cam_distance
 
 	# Sincronizador: solo la autoridad envía; los demás reciben
 	$MultiplayerSynchronizer.set_multiplayer_authority(id)
@@ -192,6 +198,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_cam_yaw -= event.relative.x * CAM_SENS
 		$SpringArm3D.rotation.x -= event.relative.y * CAM_SENS
 		$SpringArm3D.rotation.x  = clamp($SpringArm3D.rotation.x, CAM_MIN_X, CAM_MAX_X)
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			_cam_distance = clamp(_cam_distance - CAM_SCROLL_SPEED, CAM_MIN_DIST, CAM_MAX_DIST)
+			$SpringArm3D.spring_length = _cam_distance
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			_cam_distance = clamp(_cam_distance + CAM_SCROLL_SPEED, CAM_MIN_DIST, CAM_MAX_DIST)
+			$SpringArm3D.spring_length = _cam_distance
 	elif event.is_action_pressed("ui_cancel"):
 		var mode := Input.get_mouse_mode()
 		Input.set_mouse_mode(
@@ -267,7 +280,7 @@ func _stop_climbing() -> void:
 	_climbing = false
 	_climb_normal = Vector3.ZERO
 	velocity = Vector3.ZERO
-	velocity.y = 1.5  # pequeño empujón al soltarse
+	velocity.y = JUMP_VEL  # salto completo al soltarse
 
 
 func _has_climb_surface() -> bool:

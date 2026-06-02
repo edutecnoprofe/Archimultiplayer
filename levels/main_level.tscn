@@ -17,15 +17,26 @@ size = Vector3(2, 4, 2)
 [sub_resource type="BoxMesh" id="BoxMesh_1"]
 size = Vector3(2, 4, 2)
 
+[sub_resource type="Environment" id="Environment_1"]
+ambient_light_source = 1
+ambient_light_intensity = 0.85
+ambient_light_energy = 1.2
+ambient_light_energy_multiplier = 1.0
+ambient_light_sky_contribution = 0.6
+background_mode = 0
+background_color = Color(0.35, 0.4, 0.45, 1)
+
 [node name="MainLevel" type="Node3D"]
 script = ExtResource("1")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
-light_energy = 1.2
+light_energy = 1.1
 shadow_enabled = true
+shadow_blur = 2
 
 [node name="Floor" type="StaticBody3D" parent="."]
 

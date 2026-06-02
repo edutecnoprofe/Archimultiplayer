@@ -6,6 +6,8 @@ var _scale_slider  : HSlider
 var _scale_lbl     : Label
 var _scale_panel   : PanelContainer
 var _climb_prompt  : Label
+var _scale_hold_timer : float = 0.0
+var _scale_hold_delay : float = 0.15
 
 
 func _ready() -> void:
@@ -17,6 +19,7 @@ func _ready() -> void:
 
 	# Botón ESC para salir
 	set_process_unhandled_input(true)
+	set_process(true)
 
 
 func _build_ui() -> void:
@@ -130,19 +133,26 @@ func _rebuild_player_list(_id = 0, _info = {}) -> void:
 		_players_box.add_child(lbl)
 
 
+func _process(delta: float) -> void:
+	if not is_inside_tree() or not _scale_panel.visible:
+		return
+
+	var plus_pressed := Input.is_key_pressed(KEY_PLUS) or Input.is_key_pressed(KEY_EQUAL) or Input.is_key_pressed(KEY_KP_ADD)
+	var minus_pressed := Input.is_key_pressed(KEY_MINUS) or Input.is_key_pressed(KEY_KP_SUBTRACT)
+
+	if plus_pressed or minus_pressed:
+		_scale_hold_timer += delta
+		if _scale_hold_timer >= _scale_hold_delay:
+			_scale_hold_timer -= _scale_hold_delay
+			var amount := 0.05 if plus_pressed else -0.05
+			_nudge_scale(amount)
+	else:
+		_scale_hold_timer = 0.0
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_inside_tree():
 		return
-	if event is InputEventKey and event.pressed and not event.echo:
-		var k := (event as InputEventKey).keycode
-		if k == KEY_PLUS or k == KEY_EQUAL or k == KEY_KP_ADD:
-			_nudge_scale(+0.05)
-			get_viewport().set_input_as_handled()
-			return
-		if k == KEY_MINUS or k == KEY_KP_SUBTRACT:
-			_nudge_scale(-0.05)
-			get_viewport().set_input_as_handled()
-			return
 	if event.is_action_pressed("ui_focus_next"):  # Tab
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		NetworkManager.disconnect_game()
